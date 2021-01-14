@@ -1,0 +1,7 @@
+.replit
+.venv
+samdocker/.aws-sam/*
+terraformlambda/package/*
+src/lambda_function_payload.zip
+samtemplates/package/*
+samtemplates/.aws-sam/*

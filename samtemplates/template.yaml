@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-visitor-api
+  SAM template for API
+Globals:
+  Function:
+    Timeout: 10
+
+Parameters:
+  InfraStackName:
+    Description: Existing Infra stack name
+    Type: String
+    Default: AppInfraStack
+
+Resources:
+  VisitorsAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: main.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          VISITORS_TABLE: Visitors
+      Role: 
+        Fn::ImportValue: !Sub "${InfraStackName}::LambdaTrustRole"
+      Layers:
+        - !Ref libs
+      Events:
+        VisitorsApp:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  libs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: visitorsapp-python-lib
+      Description: Dependencies for the Visitors app.
+      ContentUri: package/.
+      CompatibleRuntimes:
+        - python3.8
+
+  VisitorsDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "visitorid"
+            AttributeType: "S"
+        KeySchema:
+          -
+            AttributeName: "visitorid"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "Visitors"
+
+Outputs:
+  VisitorsAppApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  VisitorsAPIFunction:
+    Description: "Function ARN"
+    Value: !GetAtt VisitorsAPIFunction.Arn

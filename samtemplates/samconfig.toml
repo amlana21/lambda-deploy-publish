@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "visitors-app"
+s3_bucket = "visitorsappac"
+s3_prefix = "appbackend"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+profile = "apiprofile"
